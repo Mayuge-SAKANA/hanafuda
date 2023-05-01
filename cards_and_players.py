@@ -161,6 +161,15 @@ class Player:
                 self.tann.append(card)
             if card.mark == Mark.KASU:
                 self.kasu.append(card)
+    
+    def validCards(self, field:Field):
+        candidates = set([])
+        for fcard in field.cards:
+            for card in self.hand:
+                if fcard.month==card.month:
+                    candidates.add(card)
+        return list(candidates)
+
 
     def isYaku(self):
         yakus = []
