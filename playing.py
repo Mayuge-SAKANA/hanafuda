@@ -36,13 +36,16 @@ while not (player1.isEmpty() and player2.isEmpty()):
         print(field.to_str())
         print()
         print("player1: ",player1.to_str())
-        print()
-        
+        print()        
         turn+=1
 
-
         # here requires player selection of card
-        card = player.playCard(player.hand[0])
+        vcands = player.validCards(field)
+        if len(vcands)==0:
+            disc = player.hand[0]
+        else:
+            disc = vcands[0]
+        card = player.playCard(disc)
         candidates = field.addCardFromPlayer(card)
 
         if len(candidates)==3 or len(candidates)==1:
