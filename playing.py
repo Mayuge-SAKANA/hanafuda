@@ -2,7 +2,24 @@
 
 from cards_and_players import Deck,Player,Field
 
-     
+
+def addCardToField(card,field,player):     
+    candidates = field.addCardFromPlayer(card)
+    if len(candidates)==3 or len(candidates)==1:
+        for cand in candidates:
+            player.addCardFromField([card,*candidates])
+    elif len(candidates)==2:
+        # here requires player selection of card
+        player.addCardFromField([card,candidates[0]])
+        field.removeCard(candidates[1])
+
+def showGame(player1,player2,field):
+    print("player2: ",player2.to_str())
+    print()
+    print(field.to_str())
+    print()
+    print("player1: ",player1.to_str())
+    print()    
 
 # initial card
 deck = Deck()
@@ -39,19 +56,12 @@ if iniYaku is not None:
 
 players = [player1,player2]
 
-turn = 0
+
 # start game
 while not (player1.isEmpty() and player2.isEmpty()):
     for pIdx, player in enumerate(players):
         
-        print(f"turn player {pIdx+1}")
-        print("player2: ",player2.to_str())
-        print()
-        print(field.to_str())
-        print()
-        print("player1: ",player1.to_str())
-        print()        
-        turn+=1
+        showGame(player1,player2,field)  
 
         # here requires player selection of card
         vcands = player.validCards(field)
@@ -59,29 +69,14 @@ while not (player1.isEmpty() and player2.isEmpty()):
             disc = player.hand[0]
         else:
             disc = vcands[0]
-        card = player.playCard(disc)
-        candidates = field.addCardFromPlayer(card)
 
-        if len(candidates)==3 or len(candidates)==1:
-            for cand in candidates:
-                player.addCardFromField([card,*candidates])
-        elif len(candidates)==2:
-            # here requires player selection of card
-            player.addCardFromField([card,candidates[0]])
-            field.removeCard(candidates[1])
+        card = player.playCard(disc)
+        addCardToField(card,field,player)
 
         newcard = deck.drawCard()
-        newcands = field.addCardFromPlayer(newcard)
-        if len(newcands)==3 or len(newcands)==1:
-            for cand in newcands:
-                player.addCardFromField([newcard,*newcands])
-        elif len(newcands)==2:
-            # here requires player selection of card
-            player.addCardFromField([newcard,newcands[0]])
-            field.removeCard(newcands[1])        
+        addCardToField(newcard,field,player)
 
         yakuDict = player.isYaku()
-    
         if player.isNewYaku(yakuDict):
             print(f"player{pIdx+1} achieved")
             for yaku in yakuDict:
@@ -93,6 +88,7 @@ while not (player1.isEmpty() and player2.isEmpty()):
                 player.koikoi(yakuDict)
             else:
                 break
+        
 
         
 
