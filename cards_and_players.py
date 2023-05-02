@@ -35,8 +35,9 @@ class Yaku(Enum):
     AMESHIKO = 10
     SHIKO = 11
     GOKO = 12
-
-
+    BOOK = 13
+    TESHI = 14
+    KUTTSUKI = 15
 
 class TannYaku(Enum):
     AKATAN = set([Month.JANUARY,Month.FEBRUARY,Month.MARCH])
@@ -103,6 +104,16 @@ class Deck:
 class Field:
     def __init__(self):
         self.cards = []
+    
+    def isIniFour(self):
+        di = {}
+        for card in self.cards:
+            if card.month not in di:
+                di[card.month]=0
+            di[card.month] +=1
+            if di[card.month]==4:
+                return True
+        return False
 
     def addCard(self,card):
         self.cards.append(card)
@@ -128,8 +139,6 @@ class Field:
         ret = ""
         for idx, card in enumerate(self.cards):
             ret += card.to_str() + " "
-            if idx%4==3:
-                ret +="\n"
         return ret
 
 class Player:
@@ -139,7 +148,7 @@ class Player:
         self.tane = []
         self.tann = []
         self.hikari = []
-        self.yaku = []
+        self.yaku = {}
 
     def isEmpty(self):
         return len(self.hand)==0
@@ -169,14 +178,43 @@ class Player:
                 if fcard.month==card.month:
                     candidates.add(card)
         return list(candidates)
+    
+    def isInitialYaku(self):
+        di = {}
+        for card in self.hand:
+            if card.month not in di:
+                di[card.month]=0
+            di[card.month] +=1
+            if di[card.month]==4:
+                return Yaku.TESHI
+        for month in di:
+            if di[month]!=2:
+                return None
+        return Yaku.KUTTSUKI
+    
+    def isNewYaku(self,newYakus):
+        if len(self.yaku)==0 and len(newYakus)==0:
+            return False
+        if len(self.yaku)==0:
+            return True
+        for yaku in self.yaku:
+            if yaku in newYakus and self.yaku[yaku]!=newYakus[yaku]:
+                return True
+        if Yaku.SANKO in self.yaku:
+            if Yaku.SHIKO in newYakus or Yaku.AMESHIKO in newYakus:
+                return True
+        if Yaku.SHIKO in self.yaku or Yaku.AMESHIKO in self.yaku:
+            if Yaku.GOKO in newYakus:
+                return True
+        return False
 
 
     def isYaku(self):
-        yakus = []
+        yakus = {}
         if len(self.kasu)>=10:
-            yakus.append(Yaku.KASU)
+            yakus[Yaku.KASU] = len(self.kasu)
         if len(self.tann)>=5:
-            yakus.append(Yaku.TANN)
+            yakus[Yaku.TANN] = len(self.tann)
         if len(self.tann)>=3:
             akaCount = 0
             aoCount = 0
@@ -184,15 +222,17 @@ class Player:
                 if card.month in TannYaku.AOTAN.value:
                     aoCount+=1
                 if card.month in TannYaku.AKATAN.value:
-                    akaCount+=1         
-            if aoCount==3:
-                yakus.append(Yaku.AOTAN)
-            if akaCount==3:
-                yakus.append(Yaku.AKATAN)
+                    akaCount+=1       
+            if aoCount==3 and akaCount ==3:
+                yakus[Yaku.BOOK] = 1
+            elif aoCount==3:
+                yakus[Yaku.AOTAN] = 1
+            elif akaCount==3:
+                yakus[Yaku.AKATAN] = 1
         if len(self.tane)>=5:
-            yakus.append(Yaku.TANE)
+            yakus[Yaku.TANE] = len(self.tane)
         if len(self.hikari)==5:
-            yakus.append(Yaku.GOKO)
+            yakus[Yaku.GOKO] = 1
         
         if len(self.hikari)==4:
             isNov = False
@@ -200,9 +240,9 @@ class Player:
                 if card.month==Month.NOVEMBER:
                     isNov = True
             if isNov:
-                yakus.append(Yaku.AMESHIKO)
+                yakus[Yaku.AMESHIKO] = 1
             else:
-                yakus.append(Yaku.SHIKO)
+                yakus[Yaku.SHIKO] = 1
 
         if len(self.hikari)==3:
             isNov = False
@@ -210,7 +250,7 @@ class Player:
                 if card.month==Month.NOVEMBER:
                     isNov = True
             if not isNov:
-                yakus.append(Yaku.SANKO)
+                yakus[Yaku.SANKO] = 1
         return yakus
     
     def koikoi(self,yakus):
