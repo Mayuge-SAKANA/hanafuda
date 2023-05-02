@@ -18,8 +18,7 @@ def showGame(player1,player2,field):
     print()
     print(field.to_str())
     print()
-    print("player1: ",player1.to_str())
-    print()    
+    print("player1: ",player1.to_str())   
 
 # initial card
 deck = Deck()
@@ -56,12 +55,14 @@ if iniYaku is not None:
 
 players = [player1,player2]
 
-
+onGame = True
 # start game
-while not (player1.isEmpty() and player2.isEmpty()):
+while onGame and (not (player1.isEmpty() and player2.isEmpty())):
     for pIdx, player in enumerate(players):
         
+        print("==============================")
         showGame(player1,player2,field)  
+        print("==============================")
 
         # here requires player selection of card
         vcands = player.validCards(field)
@@ -83,13 +84,16 @@ while not (player1.isEmpty() and player2.isEmpty()):
                 print(f"{yaku.name} ")
             print()
             # here requires player selection koikoi or not
-            isKoikoi = True
+            isKoikoi = False
             if isKoikoi: 
                 player.koikoi(yakuDict)
             else:
+                onGame = False
                 break
         
-
+print("==============================")
+showGame(player1,player2,field)  
+print("==============================")
         
 
 
