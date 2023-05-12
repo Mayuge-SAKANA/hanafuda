@@ -17,10 +17,11 @@ class Month(Enum):
     DECEMBER = 12
 
 class Mark(Enum):
-    KASU = 1
+    HIKARI = 1
     TANN = 2
     TANE = 3
-    HIKARI = 4
+    KASU = 4
+
 
 class Yaku(Enum):
     KASU = 1
@@ -38,22 +39,38 @@ class Yaku(Enum):
     BOOK = 13
     TESHI = 14
     KUTTSUKI = 15
+    NOMI = 16
 
 class TannYaku(Enum):
     AKATAN = set([Month.JANUARY,Month.FEBRUARY,Month.MARCH])
     AOTAN = set([Month.JUNE, Month.SEPTEMBER,Month.OCTOBER])
+
+class TANEYaku(Enum):
+    INOSHIKACHO = set([Month.JUNE,Month.JULY,Month.OCTOBER])
+
+
 
 class Card:
     def __init__(self, month:Month, mark:Mark):
         self.month = month  # 月（1-12）
         self.mark = mark    # 種類
     def to_str(self):
-        return f"{self.month.value}/{self.mark.name}"
+        sp = ""
+        if self.mark == Mark.TANE and self.month in TANEYaku.INOSHIKACHO.value:
+            sp = "(i)"
+        if self.mark == Mark.TANN and self.month in TannYaku.AKATAN.value:
+            sp = "(r)"            
+        if self.mark == Mark.TANN and self.month in TannYaku.AOTAN.value:
+            sp = "(b)"
+        if self.mark == Mark.HIKARI and self.month == Month.NOVEMBER:
+            sp = "(n)"
+        return f"{self.month.value}/{self.mark.name}{sp}"
 
 class Deck:
-    def __init__(self):
+    def __init__(self,seed = 0):
         self.cards = self.addAll()
-        self.shuffle(self.cards)
+        self.shuffle(seed)
+        self.seed = seed
 
     def isEmpty(self):
         return len(self.cards)==0
@@ -95,8 +112,9 @@ class Deck:
             cards.append(card)   
         return cards
 
-    def shuffle(self,cards):
-        random.shuffle(cards)
+    def shuffle(self,seed):
+        random.seed(seed)
+        random.shuffle(self.cards)
 
     def drawCard(self):
         return self.cards.pop()
@@ -115,8 +133,14 @@ class Field:
                 return True
         return False
 
+    def sortCards(self):
+        self.cards.sort(key=lambda card: (card.month.value, card.mark.value ))
+
+
     def addCard(self,card):
         self.cards.append(card)
+        self.sortCards()
+        
 
     def addCardFromPlayer(self,card:Card):
         candidates = []
@@ -130,6 +154,7 @@ class Field:
         if len(candidates)==1 or len(candidates)==3:
             for cand in candidates:
                 self.removeCard(cand) 
+        self.sortCards()
         return candidates
 
     def removeCard(self,card:Card):
@@ -142,7 +167,9 @@ class Field:
         return ret
 
 class Player:
-    def __init__(self):
+    def __init__(self,playerName:str = "",isAuto:bool = True):
+        self.playerName = playerName
+        self.isAuto = isAuto
         self.hand = []
         self.kasu = []
         self.tane = []
@@ -155,6 +182,8 @@ class Player:
 
     def addCardToHand(self,card:Card):
         self.hand.append(card)
+        self.hand.sort(key=lambda card: (card.month.value, card.mark.value ))
+
     
     def playCard(self, card:Card):
         self.hand.remove(card)
@@ -162,14 +191,18 @@ class Player:
     
     def addCardFromField(self, cards:list):
         for card in cards:
+            targetlist = []
             if card.mark == Mark.HIKARI:
-                self.hikari.append(card)
+                targetlist = self.hikari
             if card.mark == Mark.TANE:
-                self.tane.append(card)
+                targetlist = self.tane
             if card.mark == Mark.TANN:
-                self.tann.append(card)
+                targetlist = self.tann
             if card.mark == Mark.KASU:
-                self.kasu.append(card)
+                targetlist = self.kasu
+            targetlist.append(card)
+            targetlist.sort(key=lambda card: (card.month.value, card.mark.value ))
+
     
     def validCards(self, field:Field):
         candidates = set([])
@@ -206,11 +239,14 @@ class Player:
         if Yaku.SHIKO in self.yaku or Yaku.AMESHIKO in self.yaku:
             if Yaku.GOKO in newYakus:
                 return True
+        if (Yaku.HANAMI in self.yaku or Yaku.TSUKIMI in self.yaku) and Yaku.NOMI in newYakus:
+            return True
         return False
 
 
     def isYaku(self):
         yakus = {}
+        isKiku = False
         if len(self.kasu)>=10:
             yakus[Yaku.KASU] = len(self.kasu)
         if len(self.tann)>=5:
@@ -231,6 +267,17 @@ class Player:
                 yakus[Yaku.AKATAN] = 1
         if len(self.tane)>=5:
             yakus[Yaku.TANE] = len(self.tane)
+        if len(self.tane)>=1:
+            inoCount = 0
+            for card in self.tane:
+                if card.month == Month.SEPTEMBER:
+                    isKiku = True
+                if card.month in TANEYaku.INOSHIKACHO.value:
+                    inoCount+=1
+            if inoCount==3:
+                yakus[Yaku.INOSHIKA] = 1
+ 
+
         if len(self.hikari)==5:
             yakus[Yaku.GOKO] = 1
         
@@ -251,6 +298,18 @@ class Player:
                     isNov = True
             if not isNov:
                 yakus[Yaku.SANKO] = 1
+        
+        if isKiku and len(self.hikari)>0:
+            for card in self.hikari:
+                if card.month == Month.AUGUST:
+                    yakus[Yaku.TSUKIMI] = 1
+                if card.month == Month.MARCH:
+                    yakus[Yaku.HANAMI] = 1
+            if Yaku.HANAMI in yakus and Yaku.TSUKIMI in yakus:
+                yakus[Yaku.NOMI] = 1
+                yakus.pop(Yaku.HANAMI)
+                yakus.pop(Yaku.TSUKIMI)
+        
         return yakus
     
     def koikoi(self,yakus):
@@ -277,5 +336,33 @@ class Player:
         for idx, card in enumerate(self.hikari):
             ret += card.to_str() + " "
         return ret
+    
+    def selectCardFromList(self, cardList:list):
+        selectedCard = None
+        print(f"{self.playerName} select")
+        if self.isAuto:
+            selectedCard =  cardList[0]
+        else:
+            selectionDict = {}
+            showStr = ""
+            for i,card in enumerate(cardList):
+                showStr += f"{i}: {card.to_str()}, "
+                selectionDict[i] = card
+            print(showStr)
+
+            while True:
+                val = input()
+                val = int(val)
+                if val not in selectionDict:
+                    print("invalid value!")
+                    continue
+                break
+            selectedCard = selectionDict[val]
+        print(f"selected {selectedCard.to_str()}")
+        return selectedCard
+
+            
+
+
 
 
