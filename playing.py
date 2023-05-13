@@ -26,7 +26,7 @@ def showGame(player1,player2,field):
 
 def playGame():
     # initial card
-    seed = random.randint(0,100)
+    seed = random.randint(0,10000)
     playerOrder = random.randint(0,1)
     deck = Deck(seed)
     field = Field()
@@ -49,9 +49,10 @@ def playGame():
             card = deck.drawCard()
             field.addCard(card)
         if field.isIniFour():
-            print("field contains 4 cards")
-            seed = random.randint(0,100)
-            deck.shuffle(seed)
+            print(f"field contains 4 cards {seed}")
+            seed = random.randint(0,10000)
+            deck = Deck(seed)
+            field = Field()
             continue
         break
 
@@ -62,12 +63,14 @@ def playGame():
     iniYaku = player1.isInitialYaku()
     if iniYaku is not None:
         print(f"player1 iniYaku {iniYaku.name}")
+        return
 
     for i in range(playerInitialNumber):
         card = deck.drawCard()
         player2.addCardToHand(card)
     if iniYaku is not None:
         print(f"player2 iniYaku {iniYaku.name}")
+        return
 
     players = [player1,player2]
 
