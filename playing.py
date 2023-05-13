@@ -18,11 +18,11 @@ def addCardToField(card,field,player):
         field.removeCard(candidates[0])
 
 def showGame(player1,player2,field):
-    print("player2: ",player2.to_str())
+    print(f"{player2.playerName}: ",player2.to_str())
     print()
     print("field: ",field.to_str())
     print()
-    print("player1: ",player1.to_str())   
+    print(f"{player1.playerName} ",player1.to_str())   
 
 def playGame():
     # initial card
@@ -80,7 +80,10 @@ def playGame():
         for pIdx, player in enumerate(players):
             
             print("==============================")
-            showGame(player1,player2,field)  
+            if playerOrder==0:
+                showGame(player1,player2,field) 
+            else:
+                showGame(player2,player1,field) 
             print("==============================")
 
             # here requires player selection of card
@@ -110,7 +113,10 @@ def playGame():
                     break
             
     print("==============================")
-    showGame(player1,player2,field)  
+    if playerOrder==0:
+        showGame(player1,player2,field) 
+    else:
+        showGame(player2,player1,field) 
     print("==============================")
 
 

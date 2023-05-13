@@ -58,6 +58,8 @@ class Card:
         sp = ""
         if self.mark == Mark.TANE and self.month in TANEYaku.INOSHIKACHO.value:
             sp = "(i)"
+        if self.mark == Mark.TANE and self.month == Month.SEPTEMBER:
+            sp = "(k)"
         if self.mark == Mark.TANN and self.month in TannYaku.AKATAN.value:
             sp = "(r)"            
         if self.mark == Mark.TANN and self.month in TannYaku.AOTAN.value:
