@@ -15,14 +15,20 @@ def addCardToField(card,field,player):
         pickCard = player.selectCardFromList(candidates)
         player.addCardFromField([card,pickCard])
         candidates.remove(pickCard)
-        field.removeCard(candidates[0])
+        field.removeCard(pickCard)
+
 
 def showGame(player1,player2,field):
-    print(f"{player2.playerName}: ",player2.to_str())
+    players = []
+    if player1.isAuto==False:
+        players = [player2,player1]
+    else:
+        players = [player1,player2]
+    print(f"{players[0].playerName}: ",players[0].to_str())
     print()
     print("field: ",field.to_str())
     print()
-    print(f"{player1.playerName} ",player1.to_str())   
+    print(f"{players[1].playerName} ",players[1].to_str())   
 
 def playGame():
     # initial card
@@ -55,8 +61,10 @@ def playGame():
             field = Field()
             continue
         break
-
-
+    
+    print(f"deck seed is {seed}")
+    print("==============================")
+    print()
     for i in range(playerInitialNumber):
         card = deck.drawCard()
         player1.addCardToHand(card)
@@ -75,7 +83,7 @@ def playGame():
     players = [player1,player2]
 
     onGame = True
-    winner = ""
+    winner = None
     winyaku = {}
 
     # start game
@@ -83,10 +91,7 @@ def playGame():
         for pIdx, player in enumerate(players):
             
             print("==============================")
-            if playerOrder==0:
-                showGame(player1,player2,field) 
-            else:
-                showGame(player2,player1,field) 
+            showGame(player1,player2,field) 
             print("==============================")
 
             # here requires player selection of card
@@ -105,7 +110,7 @@ def playGame():
                 for yaku in yakuDict:
                     print(f"{yaku.name} ")
                 winyaku = yakuDict
-                winner = f"player{pIdx+1}"
+                winner = player
 
                 # here requires player selection koikoi or not
                 isKoikoi = False
@@ -116,21 +121,18 @@ def playGame():
                     break
             
     print("==============================")
-    if playerOrder==0:
-        showGame(player1,player2,field) 
-    else:
-        showGame(player2,player1,field) 
+    showGame(player1,player2,field) 
     print("==============================")
 
 
-    if winner == "":
+    if winner is None:
         print("hikiwake")
     else:
         yakustr = ""
         for yaku in winyaku.keys():
             yakustr += yaku.name
             yakustr += " " 
-        print(f"winner {winner}, {yakustr}")        
+        print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr}")        
 
 
 
