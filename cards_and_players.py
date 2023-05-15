@@ -22,7 +22,6 @@ class Mark(Enum):
     TANE = 3
     KASU = 4
 
-
 class Yaku(Enum):
     KASU = 1
     TANN = 2
@@ -41,14 +40,32 @@ class Yaku(Enum):
     KUTTSUKI = 15
     NOMI = 16
 
+YakuPointDict = {
+    Yaku.KASU : 1,
+    Yaku.TANN : 1,
+    Yaku.TANE : 1,
+    Yaku.HANAMI : 5,
+    Yaku.TSUKIMI : 5,
+    Yaku.AOTAN : 6,
+    Yaku.AKATAN : 6,
+    Yaku.INOSHIKA : 6,
+    Yaku.SANKO : 5,
+    Yaku.AMESHIKO : 7,
+    Yaku.SHIKO : 8,
+    Yaku.GOKO : 10,
+    Yaku.BOOK : 12,
+    Yaku.TESHI : 6,
+    Yaku.KUTTSUKI : 6,
+    Yaku.NOMI : 10,
+}
+
+
 class TannYaku(Enum):
     AKATAN = set([Month.JANUARY,Month.FEBRUARY,Month.MARCH])
     AOTAN = set([Month.JUNE, Month.SEPTEMBER,Month.OCTOBER])
 
 class TANEYaku(Enum):
     INOSHIKACHO = set([Month.JUNE,Month.JULY,Month.OCTOBER])
-
-
 
 class Card:
     def __init__(self, month:Month, mark:Mark):
@@ -138,11 +155,9 @@ class Field:
     def sortCards(self):
         self.cards.sort(key=lambda card: (card.month.value, card.mark.value ))
 
-
     def addCard(self,card):
         self.cards.append(card)
-        self.sortCards()
-        
+        self.sortCards()       
 
     def addCardFromPlayer(self,card:Card):
         candidates = []
@@ -204,8 +219,7 @@ class Player:
                 targetlist = self.kasu
             targetlist.append(card)
             targetlist.sort(key=lambda card: (card.month.value, card.mark.value ))
-
-    
+   
     def validCards(self, field:Field):
         candidates = set([])
         for fcard in field.cards:
@@ -245,7 +259,6 @@ class Player:
             return True
         return False
 
-
     def isYaku(self):
         yakus = {}
         isKiku = False
@@ -279,10 +292,13 @@ class Player:
             if inoCount==3:
                 yakus[Yaku.INOSHIKA] = 1
  
-
         if len(self.hikari)==5:
             yakus[Yaku.GOKO] = 1
-        
+            if Yaku.SHIKO in yakus:
+                yakus.pop(Yaku.SHIKO)
+            if Yaku.AMESHIKO in yakus:
+                yakus.pop(Yaku.AMESHIKO)
+
         if len(self.hikari)==4:
             isNov = False
             for card in self.hikari:
@@ -292,6 +308,7 @@ class Player:
                 yakus[Yaku.AMESHIKO] = 1
             else:
                 yakus[Yaku.SHIKO] = 1
+            yakus.pop(Yaku.SANKO)
 
         if len(self.hikari)==3:
             isNov = False
@@ -310,8 +327,7 @@ class Player:
             if Yaku.HANAMI in yakus and Yaku.TSUKIMI in yakus:
                 yakus[Yaku.NOMI] = 1
                 yakus.pop(Yaku.HANAMI)
-                yakus.pop(Yaku.TSUKIMI)
-        
+                yakus.pop(Yaku.TSUKIMI)      
         return yakus
     
     def koikoi(self,yakus):
@@ -362,6 +378,22 @@ class Player:
             selectedCard = selectionDict[val]
         print(f"selected {selectedCard.to_str()}")
         return selectedCard
+    
+    def selectKoikoi(self,yakus,randVal = 0):
+        isKoikoi = False
+        if self.isAuto:
+            isKoikoi = randVal>0
+        else:
+            print(f"Koikoi?")
+            print("0: koikoi, 1: end game")
+            val = input()
+            isKoikoi = int(val)==0
+        if isKoikoi:
+            self.yaku = yakus
+        return isKoikoi
+        
+            
+            
 
             
 
