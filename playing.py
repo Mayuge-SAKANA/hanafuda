@@ -1,5 +1,6 @@
 from cards_and_players import Deck,Player,Field,YakuPointDict
 import random 
+import argparse
 
 def addCardToField(card,field,player):     
     candidates = field.addCardFromPlayer(card)
@@ -59,22 +60,16 @@ def playGame():
     print(f"deck seed is {seed}")
     print("==============================")
     print()
-    for i in range(playerInitialNumber):
-        card = deck.drawCard()
-        player1.addCardToHand(card)
-    iniYaku = player1.isInitialYaku()
-    if iniYaku is not None:
-        print(f"player1 iniYaku {iniYaku.name}")
-        return YakuPointDict[iniYaku]
-
-    for i in range(playerInitialNumber):
-        card = deck.drawCard()
-        player2.addCardToHand(card)
-    if iniYaku is not None:
-        print(f"player2 iniYaku {iniYaku.name}")
-        return YakuPointDict[iniYaku]
 
     players = [player1,player2]
+    for player in players:
+        for i in range(playerInitialNumber):
+            card = deck.drawCard()
+            player.addCardToHand(card)
+        iniYaku = player.isInitialYaku()
+        if iniYaku is not None:
+            print(f"{player.playerName} iniYaku {iniYaku.name}")
+            return YakuPointDict[iniYaku]
 
     onGame = True
     winner = None
@@ -84,9 +79,10 @@ def playGame():
     while onGame and (not (player1.isEmpty() and player2.isEmpty())):
         for pIdx, player in enumerate(players):
             
-            print("==============================")
-            showGame(player1,player2,field) 
-            print("==============================")
+            if player.isAuto is False:
+                print("==============================")
+                showGame(player1,player2,field) 
+                print("==============================")
 
             # here requires player selection of card
 
@@ -126,12 +122,19 @@ def playGame():
         yakustr += yaku.name
         yakustr += " " 
         point += YakuPointDict[yaku] * winyaku[yaku]
-    print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr} {point}points")   
-    return point
-             
+    print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr} {point} points")   
+    return point        
 
-if __name__ == "__main__": 
-    playGame()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--playnum', type=int, default=1)
+    args = parser.parse_args()
+    playnum = args.playnum
+    total = 0
+    for i in range(playnum):
+        print(f"play {i}th game")
+        sc = playGame()
 
-
+if __name__ == "__main__":
+    main()
 
