@@ -263,9 +263,9 @@ class Player:
         yakus = {}
         isKiku = False
         if len(self.kasu)>=10:
-            yakus[Yaku.KASU] = len(self.kasu)
+            yakus[Yaku.KASU] = len(self.kasu)-9
         if len(self.tann)>=5:
-            yakus[Yaku.TANN] = len(self.tann)
+            yakus[Yaku.TANN] = len(self.tann)-4
         if len(self.tann)>=3:
             akaCount = 0
             aoCount = 0
@@ -280,8 +280,10 @@ class Player:
                 yakus[Yaku.AOTAN] = 1
             elif akaCount==3:
                 yakus[Yaku.AKATAN] = 1
+            elif len(self.tann)>=5:
+                yakus[Yaku.TANN] = len(self.tann)-4
         if len(self.tane)>=5:
-            yakus[Yaku.TANE] = len(self.tane)
+            yakus[Yaku.TANE] = len(self.tane)-4
         if len(self.tane)>=1:
             inoCount = 0
             for card in self.tane:
@@ -308,7 +310,8 @@ class Player:
                 yakus[Yaku.AMESHIKO] = 1
             else:
                 yakus[Yaku.SHIKO] = 1
-            yakus.pop(Yaku.SANKO)
+            if Yaku.SANKO in yakus:
+                yakus.pop(Yaku.SANKO)
 
         if len(self.hikari)==3:
             isNov = False
