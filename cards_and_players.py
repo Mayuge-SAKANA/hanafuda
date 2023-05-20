@@ -372,10 +372,13 @@ class Player:
             print(showStr)
 
             while True:
-                val = input()
-                val = int(val)
-                if val not in selectionDict:
-                    print("invalid value!")
+                try:
+                    val = input()
+                    val = int(val)
+                except:
+                    if val == "c":
+                        break
+                    print("invalid value! (if you want to break game, press c)")
                     continue
                 break
             selectedCard = selectionDict[val]
@@ -384,13 +387,25 @@ class Player:
     
     def selectKoikoi(self,yakus,randVal = 0):
         isKoikoi = False
+        if len(self.hand)==0:
+            return isKoikoi
+        
         if self.isAuto:
             isKoikoi = randVal>0
-        else:
+        else:   
             print(f"Koikoi?")
             print("0: koikoi, 1: end game")
-            val = input()
-            isKoikoi = int(val)==0
+            while True:
+                try:
+                    val = input()
+                    isKoikoi = int(val)==0
+                    break
+                except:
+                    if val == "c":
+                        break                    
+                    print("invalid value! (if you want to break game, press c)")
+                    continue
+            
         if isKoikoi:
             self.yaku = yakus
         return isKoikoi

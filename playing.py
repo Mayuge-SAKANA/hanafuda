@@ -5,8 +5,7 @@ import argparse
 def addCardToField(card,field,player):     
     candidates = field.addCardFromPlayer(card)
     if len(candidates)==3 or len(candidates)==1:
-        for cand in candidates:
-            player.addCardFromField([card,*candidates])
+        player.addCardFromField([card,*candidates])
     elif len(candidates)==2:
         # here requires player selection of card
         print("card month is overlapped in the field. please select")
@@ -27,20 +26,10 @@ def showGame(player1,player2,field):
     print()
     print(f"{players[1].playerName} ",players[1].to_str())   
 
-def playGame():
+def playGame(player1,player2,seed):
     # initial card
-    seed = random.randint(0,10000)
-    playerOrder = random.randint(0,1)
     deck = Deck(seed)
     field = Field()
-
-    player1 = Player("player1",isAuto=(playerOrder==1))
-    player2 = Player("player2",isAuto=(playerOrder==0))
-
-    print("==============================")
-    print(f"you are player {playerOrder+1}")
-    print("==============================")
-    print()
 
     fieldInitialNumber = 8
     playerInitialNumber = 8
@@ -69,7 +58,7 @@ def playGame():
         iniYaku = player.isInitialYaku()
         if iniYaku is not None:
             print(f"{player.playerName} iniYaku {iniYaku.name}")
-            return YakuPointDict[iniYaku]
+            return YakuPointDict[iniYaku], player
 
     onGame = True
     winner = None
@@ -114,7 +103,7 @@ def playGame():
     point = 0
     if winner is None:
         print("hikiwake")
-        return point
+        return point, winner
 
     yakustr = ""
     point = 0
@@ -122,8 +111,11 @@ def playGame():
         yakustr += yaku.name
         yakustr += " " 
         point += YakuPointDict[yaku] * winyaku[yaku]
-    print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr} {point} points")   
-    return point        
+    print("==============================")
+    print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr} {point} points") 
+    print("==============================")
+    print()  
+    return point,winner        
 
 def main():
     parser = argparse.ArgumentParser()
@@ -131,10 +123,37 @@ def main():
     args = parser.parse_args()
     playnum = args.playnum
     total = 0
+    playerName = "you"
+    playerOrder = random.randint(0,1)
+    print("==============================")
+    print(f"you are {playerOrder+1} th player")
+    print("==============================")
+    print()
+    total = 0
+    cputotal = 0
     for i in range(playnum):
         print(f"play {i}th game")
-        sc = playGame()
-
+        seed = random.randint(0,10000)
+        player1 = Player(playerName if playerOrder==0 else "player1",isAuto=(playerOrder==1))
+        player2 = Player(playerName if playerOrder==1 else "player2",isAuto=(playerOrder==0))
+        sc,winner = playGame(player1,player2,seed)
+        if sc>=7:
+            sc*=2
+        if winner.playerName == playerName:
+            total += sc
+            playerOrder = 0
+        elif winner is not None:
+            playerOrder = 1 
+            cputotal += sc
+    
+    print("==============================")
+    if total>cputotal:
+        print(f"you win !!! {total}/{cputotal}")
+    elif total<cputotal:
+        print(f"you lose ... {cputotal}/{total}")
+    else:
+        print(f"draw")
+    print("==============================")
 if __name__ == "__main__":
     main()
 
