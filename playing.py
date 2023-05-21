@@ -1,4 +1,4 @@
-from cards_and_players import Deck,Player,Field,YakuPointDict
+from cards_and_players import Deck,Player,Field,YakuManager
 import random 
 import argparse
 
@@ -30,6 +30,7 @@ def playGame(player1,player2,seed):
     # initial card
     deck = Deck(seed)
     field = Field()
+    yakuMng = YakuManager()
 
     fieldInitialNumber = 8
     playerInitialNumber = 8
@@ -55,10 +56,10 @@ def playGame(player1,player2,seed):
         for i in range(playerInitialNumber):
             card = deck.drawCard()
             player.addCardToHand(card)
-        iniYaku = player.isInitialYaku()
+        iniYaku = yakuMng.isInitialYaku(player)
         if iniYaku is not None:
             print(f"{player.playerName} iniYaku {iniYaku.name}")
-            return YakuPointDict[iniYaku], player
+            return yakuMng.YakuPointDict[iniYaku], player
 
     onGame = True
     winner = None
@@ -83,11 +84,17 @@ def playGame(player1,player2,seed):
             newcard = deck.drawCard()
             addCardToField(newcard,field,player)
 
-            yakuDict = player.isYaku()
-            if player.isNewYaku(yakuDict):
+            yakuDict = yakuMng.isYaku(player)
+            if yakuMng.isNewYaku(yakuDict, player):
+                print("==============================")
+                showGame(player1,player2,field) 
+                print("==============================")     
+
                 print(f"player{pIdx+1} achieved")
                 for yaku in yakuDict:
                     print(f"{yaku.name} ")
+
+
 
                 # here requires player selection koikoi or not
                 isKoikoi = player.selectKoikoi(yakuDict)
@@ -97,9 +104,7 @@ def playGame(player1,player2,seed):
                     winner = player
                     break
             
-    print("==============================")
-    showGame(player1,player2,field) 
-    print("==============================")
+
     point = 0
     if winner is None:
         print("hikiwake")
@@ -110,7 +115,7 @@ def playGame(player1,player2,seed):
     for yaku in winyaku.keys():
         yakustr += yaku.name
         yakustr += " " 
-        point += YakuPointDict[yaku] * winyaku[yaku]
+        point += yakuMng.YakuPointDict[yaku] * winyaku[yaku]
     print("==============================")
     print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr} {point} points") 
     print("==============================")

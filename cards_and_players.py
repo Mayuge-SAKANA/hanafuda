@@ -40,26 +40,6 @@ class Yaku(Enum):
     KUTTSUKI = 15
     NOMI = 16
 
-YakuPointDict = {
-    Yaku.KASU : 1,
-    Yaku.TANN : 1,
-    Yaku.TANE : 1,
-    Yaku.HANAMI : 5,
-    Yaku.TSUKIMI : 5,
-    Yaku.AOTAN : 6,
-    Yaku.AKATAN : 6,
-    Yaku.INOSHIKA : 6,
-    Yaku.SANKO : 5,
-    Yaku.AMESHIKO : 7,
-    Yaku.SHIKO : 8,
-    Yaku.GOKO : 10,
-    Yaku.BOOK : 12,
-    Yaku.TESHI : 6,
-    Yaku.KUTTSUKI : 6,
-    Yaku.NOMI : 10,
-}
-
-
 class TannYaku(Enum):
     AKATAN = set([Month.JANUARY,Month.FEBRUARY,Month.MARCH])
     AOTAN = set([Month.JUNE, Month.SEPTEMBER,Month.OCTOBER])
@@ -71,6 +51,7 @@ class Card:
     def __init__(self, month:Month, mark:Mark):
         self.month = month  # 月（1-12）
         self.mark = mark    # 種類
+
     def to_str(self):
         sp = ""
         if self.mark == Mark.TANE and self.month in TANEYaku.INOSHIKACHO.value:
@@ -138,6 +119,7 @@ class Deck:
     def drawCard(self):
         return self.cards.pop()
 
+
 class Field:
     def __init__(self):
         self.cards = []
@@ -200,7 +182,6 @@ class Player:
     def addCardToHand(self,card:Card):
         self.hand.append(card)
         self.hand.sort(key=lambda card: (card.month.value, card.mark.value ))
-
     
     def playCard(self, card:Card):
         self.hand.remove(card)
@@ -227,136 +208,6 @@ class Player:
                 if fcard.month==card.month:
                     candidates.add(card)
         return list(candidates)
-    
-    def isInitialYaku(self):
-        di = {}
-        for card in self.hand:
-            if card.month not in di:
-                di[card.month]=0
-            di[card.month] +=1
-            if di[card.month]==4:
-                return Yaku.TESHI
-        for month in di:
-            if di[month]!=2:
-                return None
-        return Yaku.KUTTSUKI
-    
-    def isNewYaku(self,newYakus):
-        if len(self.yaku)==0 and len(newYakus)==0:
-            return False
-        if len(self.yaku)==0:
-            return True
-        for yaku in self.yaku:
-            if yaku in newYakus and self.yaku[yaku]!=newYakus[yaku]:
-                return True
-        if Yaku.SANKO in self.yaku:
-            if Yaku.SHIKO in newYakus or Yaku.AMESHIKO in newYakus:
-                return True
-        if Yaku.SHIKO in self.yaku or Yaku.AMESHIKO in self.yaku:
-            if Yaku.GOKO in newYakus:
-                return True
-        if (Yaku.HANAMI in self.yaku or Yaku.TSUKIMI in self.yaku) and Yaku.NOMI in newYakus:
-            return True
-        return False
-
-    def isYaku(self):
-        yakus = {}
-        isKiku = False
-        if len(self.kasu)>=10:
-            yakus[Yaku.KASU] = len(self.kasu)-9
-        if len(self.tann)>=5:
-            yakus[Yaku.TANN] = len(self.tann)-4
-        if len(self.tann)>=3:
-            akaCount = 0
-            aoCount = 0
-            for card in self.tann:
-                if card.month in TannYaku.AOTAN.value:
-                    aoCount+=1
-                if card.month in TannYaku.AKATAN.value:
-                    akaCount+=1       
-            if aoCount==3 and akaCount ==3:
-                yakus[Yaku.BOOK] = 1
-            elif aoCount==3:
-                yakus[Yaku.AOTAN] = 1
-            elif akaCount==3:
-                yakus[Yaku.AKATAN] = 1
-            elif len(self.tann)>=5:
-                yakus[Yaku.TANN] = len(self.tann)-4
-        if len(self.tane)>=5:
-            yakus[Yaku.TANE] = len(self.tane)-4
-        if len(self.tane)>=1:
-            inoCount = 0
-            for card in self.tane:
-                if card.month == Month.SEPTEMBER:
-                    isKiku = True
-                if card.month in TANEYaku.INOSHIKACHO.value:
-                    inoCount+=1
-            if inoCount==3:
-                yakus[Yaku.INOSHIKA] = 1
- 
-        if len(self.hikari)==5:
-            yakus[Yaku.GOKO] = 1
-            if Yaku.SHIKO in yakus:
-                yakus.pop(Yaku.SHIKO)
-            if Yaku.AMESHIKO in yakus:
-                yakus.pop(Yaku.AMESHIKO)
-
-        if len(self.hikari)==4:
-            isNov = False
-            for card in self.hikari:
-                if card.month==Month.NOVEMBER:
-                    isNov = True
-            if isNov:
-                yakus[Yaku.AMESHIKO] = 1
-            else:
-                yakus[Yaku.SHIKO] = 1
-            if Yaku.SANKO in yakus:
-                yakus.pop(Yaku.SANKO)
-
-        if len(self.hikari)==3:
-            isNov = False
-            for card in self.hikari:
-                if card.month==Month.NOVEMBER:
-                    isNov = True
-            if not isNov:
-                yakus[Yaku.SANKO] = 1
-        
-        if isKiku and len(self.hikari)>0:
-            for card in self.hikari:
-                if card.month == Month.AUGUST:
-                    yakus[Yaku.TSUKIMI] = 1
-                if card.month == Month.MARCH:
-                    yakus[Yaku.HANAMI] = 1
-            if Yaku.HANAMI in yakus and Yaku.TSUKIMI in yakus:
-                yakus[Yaku.NOMI] = 1
-                yakus.pop(Yaku.HANAMI)
-                yakus.pop(Yaku.TSUKIMI)      
-        return yakus
-    
-    def koikoi(self,yakus):
-        self.yaku = yakus
-
-    def to_str(self):
-        ret = ""
-        for idx, card in enumerate(self.hand):
-            ret += card.to_str() + " "
-        ret +="\n "
-        ret +="kasu: "
-        for idx, card in enumerate(self.kasu):
-            ret += card.to_str() + " "
-        ret +="\n "
-        ret +="tann: "
-        for idx, card in enumerate(self.tann):
-            ret += card.to_str() + " "
-        ret +="\n "
-        ret +="tane: "
-        for idx, card in enumerate(self.tane):
-            ret += card.to_str() + " "
-        ret +="\n "
-        ret +="hikari: "
-        for idx, card in enumerate(self.hikari):
-            ret += card.to_str() + " "
-        return ret
     
     def selectCardFromList(self, cardList:list):
         selectedCard = None
@@ -409,9 +260,155 @@ class Player:
         if isKoikoi:
             self.yaku = yakus
         return isKoikoi
+
+    def to_str(self):
+        ret = ""
+        for idx, card in enumerate(self.hand):
+            ret += card.to_str() + " "
+        ret +="\n "
+        ret +="kasu: "
+        for idx, card in enumerate(self.kasu):
+            ret += card.to_str() + " "
+        ret +="\n "
+        ret +="tann: "
+        for idx, card in enumerate(self.tann):
+            ret += card.to_str() + " "
+        ret +="\n "
+        ret +="tane: "
+        for idx, card in enumerate(self.tane):
+            ret += card.to_str() + " "
+        ret +="\n "
+        ret +="hikari: "
+        for idx, card in enumerate(self.hikari):
+            ret += card.to_str() + " "
+        return ret
+
+
+class YakuManager:         
+    def __init__(self):
+        self.YakuPointDict = {
+            Yaku.KASU : 1,
+            Yaku.TANN : 1,
+            Yaku.TANE : 1,
+            Yaku.HANAMI : 5,
+            Yaku.TSUKIMI : 5,
+            Yaku.AOTAN : 6,
+            Yaku.AKATAN : 6,
+            Yaku.INOSHIKA : 6,
+            Yaku.SANKO : 5,
+            Yaku.AMESHIKO : 7,
+            Yaku.SHIKO : 8,
+            Yaku.GOKO : 10,
+            Yaku.BOOK : 12,
+            Yaku.TESHI : 6,
+            Yaku.KUTTSUKI : 6,
+            Yaku.NOMI : 10,
+        }
+
+    def isInitialYaku(self,player:Player):
+        di = {}
+        for card in player.hand:
+            if card.month not in di:
+                di[card.month]=0
+            di[card.month] +=1
+            if di[card.month]==4:
+                return Yaku.TESHI
+        for month in di:
+            if di[month]!=2:
+                return None
+        return Yaku.KUTTSUKI
+    
+    def isNewYaku(self,newYakus:dict,player:Player):
+        if len(player.yaku)==0 and len(newYakus)==0:
+            return False
+        if len(player.yaku)==0:
+            return True
+        for yaku in player.yaku:
+            if yaku in newYakus and player.yaku[yaku]!=newYakus[yaku]:
+                return True
+        if Yaku.SANKO in player.yaku:
+            if Yaku.SHIKO in newYakus or Yaku.AMESHIKO in newYakus:
+                return True
+        if Yaku.SHIKO in player.yaku or Yaku.AMESHIKO in player.yaku:
+            if Yaku.GOKO in newYakus:
+                return True
+        if (Yaku.HANAMI in player.yaku or Yaku.TSUKIMI in player.yaku) and Yaku.NOMI in newYakus:
+            return True
+        return False
+
+    def isYaku(self,player:Player):
+        yakus = {}
+        isKiku = False
+        if len(player.kasu)>=10:
+            yakus[Yaku.KASU] = len(player.kasu)-9
+        if len(player.tann)>=5:
+            yakus[Yaku.TANN] = len(player.tann)-4
+        if len(player.tann)>=3:
+            akaCount = 0
+            aoCount = 0
+            for card in player.tann:
+                if card.month in TannYaku.AOTAN.value:
+                    aoCount+=1
+                if card.month in TannYaku.AKATAN.value:
+                    akaCount+=1       
+            if aoCount==3 and akaCount ==3:
+                yakus[Yaku.BOOK] = 1
+            elif aoCount==3:
+                yakus[Yaku.AOTAN] = 1
+            elif akaCount==3:
+                yakus[Yaku.AKATAN] = 1
+            elif len(player.tann)>=5:
+                yakus[Yaku.TANN] = len(player.tann)-4
+        if len(player.tane)>=5:
+            yakus[Yaku.TANE] = len(player.tane)-4
+        if len(player.tane)>=1:
+            inoCount = 0
+            for card in player.tane:
+                if card.month == Month.SEPTEMBER:
+                    isKiku = True
+                if card.month in TANEYaku.INOSHIKACHO.value:
+                    inoCount+=1
+            if inoCount==3:
+                yakus[Yaku.INOSHIKA] = 1
+ 
+        if len(player.hikari)==5:
+            yakus[Yaku.GOKO] = 1
+            if Yaku.SHIKO in yakus:
+                yakus.pop(Yaku.SHIKO)
+            if Yaku.AMESHIKO in yakus:
+                yakus.pop(Yaku.AMESHIKO)
+
+        if len(player.hikari)==4:
+            isNov = False
+            for card in player.hikari:
+                if card.month==Month.NOVEMBER:
+                    isNov = True
+            if isNov:
+                yakus[Yaku.AMESHIKO] = 1
+            else:
+                yakus[Yaku.SHIKO] = 1
+            if Yaku.SANKO in yakus:
+                yakus.pop(Yaku.SANKO)
+
+        if len(player.hikari)==3:
+            isNov = False
+            for card in player.hikari:
+                if card.month==Month.NOVEMBER:
+                    isNov = True
+            if not isNov:
+                yakus[Yaku.SANKO] = 1
         
-            
-            
+        if isKiku and len(player.hikari)>0:
+            for card in player.hikari:
+                if card.month == Month.AUGUST:
+                    yakus[Yaku.TSUKIMI] = 1
+                if card.month == Month.MARCH:
+                    yakus[Yaku.HANAMI] = 1
+            if Yaku.HANAMI in yakus and Yaku.TSUKIMI in yakus:
+                yakus[Yaku.NOMI] = 1
+                yakus.pop(Yaku.HANAMI)
+                yakus.pop(Yaku.TSUKIMI)      
+        return yakus            
 
             
 
