@@ -1,4 +1,4 @@
-from cards_and_players import Deck,Player,Field,YakuManager
+from playingdata import Deck,Player,Field,YakuManager
 import random 
 import argparse
 

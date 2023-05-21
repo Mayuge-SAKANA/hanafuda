@@ -1,70 +1,7 @@
 #%%
-from enum import Enum
 import random
-
-class Month(Enum):
-    JANUARY = 1
-    FEBRUARY = 2
-    MARCH = 3
-    APRIL = 4
-    MAY = 5
-    JUNE = 6
-    JULY = 7
-    AUGUST = 8
-    SEPTEMBER = 9
-    OCTOBER = 10
-    NOVEMBER = 11
-    DECEMBER = 12
-
-class Mark(Enum):
-    HIKARI = 1
-    TANN = 2
-    TANE = 3
-    KASU = 4
-
-class Yaku(Enum):
-    KASU = 1
-    TANN = 2
-    TANE = 3
-    HANAMI = 4
-    TSUKIMI = 5
-    AOTAN = 6
-    AKATAN = 7
-    INOSHIKA = 8
-    SANKO = 9
-    AMESHIKO = 10
-    SHIKO = 11
-    GOKO = 12
-    BOOK = 13
-    TESHI = 14
-    KUTTSUKI = 15
-    NOMI = 16
-
-class TannYaku(Enum):
-    AKATAN = set([Month.JANUARY,Month.FEBRUARY,Month.MARCH])
-    AOTAN = set([Month.JUNE, Month.SEPTEMBER,Month.OCTOBER])
-
-class TANEYaku(Enum):
-    INOSHIKACHO = set([Month.JUNE,Month.JULY,Month.OCTOBER])
-
-class Card:
-    def __init__(self, month:Month, mark:Mark):
-        self.month = month  # 月（1-12）
-        self.mark = mark    # 種類
-
-    def to_str(self):
-        sp = ""
-        if self.mark == Mark.TANE and self.month in TANEYaku.INOSHIKACHO.value:
-            sp = "(i)"
-        if self.mark == Mark.TANE and self.month == Month.SEPTEMBER:
-            sp = "(k)"
-        if self.mark == Mark.TANN and self.month in TannYaku.AKATAN.value:
-            sp = "(r)"            
-        if self.mark == Mark.TANN and self.month in TannYaku.AOTAN.value:
-            sp = "(b)"
-        if self.mark == Mark.HIKARI and self.month == Month.NOVEMBER:
-            sp = "(n)"
-        return f"{self.month.value}/{self.mark.name}{sp}"
+from gameinfo import Month, Mark, TANEYaku, TannYaku, Yaku, Card
+from decisionmake import DecisionMake, UserInterface
 
 class Deck:
     def __init__(self,seed = 0):
@@ -181,7 +118,6 @@ class Player:
         else:
             self.DecisionMaiking = DecisionMake()
 
-
     def isEmpty(self):
         return len(self.hand)==0
 
@@ -253,7 +189,6 @@ class Player:
         for idx, card in enumerate(self.hikari):
             ret += card.to_str() + " "
         return ret
-
 
 class YakuManager:         
     def __init__(self):
@@ -381,49 +316,9 @@ class YakuManager:
                 yakus.pop(Yaku.TSUKIMI)      
         return yakus            
 
-class DecisionMake:
-    def selectCardFromList(self, cardList:list):
-        return cardList[0]
-    def selectKoikoi(self):
-        return False
-
-class UserInterface(DecisionMake):
-    def selectCardFromList(self, cardList:list):
-        selectionDict = {}
-        showStr = ""
-        for i,card in enumerate(cardList):
-            showStr += f"{i}: {card.to_str()}, "
-            selectionDict[i] = card
-        print(showStr)
-
-        while True:
-            try:
-                val = input()
-                val = int(val)
-            except:
-                if val == "c":
-                    break
-                print("invalid value! (if you want to break game, press c)")
-                continue
-            break
-        selectedCard = selectionDict[val]     
-        return selectedCard  
-    
-    def selectKoikoi(self):
-        print(f"Koikoi?")
-        print("0: koikoi, 1: end game")
-        while True:
-            try:
-                val = input()
-                isKoikoi = int(val)==0
-                break
-            except:
-                if val == "c":
-                    break                    
-                print("invalid value! (if you want to break game, press c)")
-                continue
-        return isKoikoi
 
 
 
 
+
+# %%
