@@ -94,8 +94,6 @@ def playGame(player1,player2,seed):
                 for yaku in yakuDict:
                     print(f"{yaku.name} ")
 
-
-
                 # here requires player selection koikoi or not
                 isKoikoi = player.selectKoikoi(yakuDict)
                 if not isKoikoi: 
@@ -104,7 +102,6 @@ def playGame(player1,player2,seed):
                     winner = player
                     break
             
-
     point = 0
     if winner is None:
         print("hikiwake")
@@ -159,6 +156,7 @@ def main():
     else:
         print(f"draw")
     print("==============================")
+    
 if __name__ == "__main__":
     main()
 
