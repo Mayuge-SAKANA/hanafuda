@@ -175,6 +175,12 @@ class Player:
         self.tann = []
         self.hikari = []
         self.yaku = {}
+        self.DecisionMaiking = None
+        if not isAuto:
+            self.DecisionMaiking = UserInterface()
+        else:
+            self.DecisionMaiking = DecisionMake()
+
 
     def isEmpty(self):
         return len(self.hand)==0
@@ -212,51 +218,16 @@ class Player:
     def selectCardFromList(self, cardList:list):
         selectedCard = None
         print(f"{self.playerName} select")
-        if self.isAuto:
-            selectedCard =  cardList[0]
-        else:
-            selectionDict = {}
-            showStr = ""
-            for i,card in enumerate(cardList):
-                showStr += f"{i}: {card.to_str()}, "
-                selectionDict[i] = card
-            print(showStr)
-
-            while True:
-                try:
-                    val = input()
-                    val = int(val)
-                except:
-                    if val == "c":
-                        break
-                    print("invalid value! (if you want to break game, press c)")
-                    continue
-                break
-            selectedCard = selectionDict[val]
+        selectedCard = self.DecisionMaiking.selectCardFromList(cardList)
         print(f"selected {selectedCard.to_str()}")
         return selectedCard
     
-    def selectKoikoi(self,yakus,randVal = 0):
+    def selectKoikoi(self,yakus):
         isKoikoi = False
         if len(self.hand)==0:
             return isKoikoi
-        
-        if self.isAuto:
-            isKoikoi = randVal>0
-        else:   
-            print(f"Koikoi?")
-            print("0: koikoi, 1: end game")
-            while True:
-                try:
-                    val = input()
-                    isKoikoi = int(val)==0
-                    break
-                except:
-                    if val == "c":
-                        break                    
-                    print("invalid value! (if you want to break game, press c)")
-                    continue
-            
+        isKoikoi = self.DecisionMaiking.selectKoikoi()
+
         if isKoikoi:
             self.yaku = yakus
         return isKoikoi
@@ -410,7 +381,48 @@ class YakuManager:
                 yakus.pop(Yaku.TSUKIMI)      
         return yakus            
 
-            
+class DecisionMake:
+    def selectCardFromList(self, cardList:list):
+        return cardList[0]
+    def selectKoikoi(self):
+        return False
+
+class UserInterface(DecisionMake):
+    def selectCardFromList(self, cardList:list):
+        selectionDict = {}
+        showStr = ""
+        for i,card in enumerate(cardList):
+            showStr += f"{i}: {card.to_str()}, "
+            selectionDict[i] = card
+        print(showStr)
+
+        while True:
+            try:
+                val = input()
+                val = int(val)
+            except:
+                if val == "c":
+                    break
+                print("invalid value! (if you want to break game, press c)")
+                continue
+            break
+        selectedCard = selectionDict[val]     
+        return selectedCard  
+    
+    def selectKoikoi(self):
+        print(f"Koikoi?")
+        print("0: koikoi, 1: end game")
+        while True:
+            try:
+                val = input()
+                isKoikoi = int(val)==0
+                break
+            except:
+                if val == "c":
+                    break                    
+                print("invalid value! (if you want to break game, press c)")
+                continue
+        return isKoikoi
 
 
 
