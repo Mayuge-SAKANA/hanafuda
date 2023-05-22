@@ -113,6 +113,8 @@ def playGame(player1,player2,seed):
         yakustr += yaku.name
         yakustr += " " 
         point += yakuMng.YakuPointDict[yaku] * winyaku[yaku]
+    if point>=7:
+        point*=2
     print("==============================")
     print(f"winner {winner.playerName}{'(you)' if not winner.isAuto else '(cpu)'}, {yakustr} {point} points") 
     print("==============================")
@@ -139,14 +141,13 @@ def main():
         player1 = Player(playerName if playerOrder==0 else "player1",isAuto=(playerOrder==1))
         player2 = Player(playerName if playerOrder==1 else "player2",isAuto=(playerOrder==0))
         sc,winner = playGame(player1,player2,seed)
-        if sc>=7:
-            sc*=2
-        if winner.playerName == playerName:
-            total += sc
-            playerOrder = 0
-        elif winner is not None:
-            playerOrder = 1 
-            cputotal += sc
+        if winner is not None:
+            if winner.playerName == playerName:
+                total += sc
+                playerOrder = 0
+            else:
+                playerOrder = 1 
+                cputotal += sc
     
     print("==============================")
     if total>cputotal:

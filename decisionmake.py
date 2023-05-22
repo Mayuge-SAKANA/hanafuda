@@ -18,13 +18,14 @@ class UserInterface(DecisionMake):
             try:
                 val = input()
                 val = int(val)
+                selectedCard = selectionDict[val]  
             except:
                 if val == "c":
                     break
                 print("invalid value! (if you want to break game, press c)")
                 continue
             break
-        selectedCard = selectionDict[val]     
+           
         return selectedCard  
     
     def selectKoikoi(self):
