@@ -40,7 +40,7 @@ def playGame(player1,player2,seed):
             card = deck.drawCard()
             field.addCard(card)
         if field.isIniFour():
-            print(f"field contains 4 cards {seed}")
+            print(f"field contains 4 cards ({seed}). restart.")
             seed = random.randint(0,10000)
             deck = Deck(seed)
             field = Field()
