@@ -1,4 +1,3 @@
-
 class DecisionMake:
     def selectCardFromList(self, cardList:list):
         return cardList[0]

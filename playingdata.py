@@ -56,6 +56,12 @@ class Deck:
     def drawCard(self):
         return self.cards.pop()
 
+    def to_str(self):
+        ret = ""
+        for card in self.cards:
+            ret += card.to_str() +" "
+        return ret
+
 
 class Field:
     def __init__(self):
@@ -158,7 +164,7 @@ class Player:
         print(f"selected {selectedCard.to_str()}")
         return selectedCard
     
-    def selectKoikoi(self,yakus):
+    def selectKoikoi(self,yakus:dict):
         isKoikoi = False
         if len(self.hand)==0:
             return isKoikoi
@@ -191,7 +197,11 @@ class Player:
         return ret
 
 class YakuManager:         
-    def __init__(self):
+    def __init__(self,player1:Player=None,player2:Player=None,field:Field=None,deck:Deck=None):
+        self.player1 = player1
+        self.player2 = player2
+        self.field = field
+        self.deck = deck
         self.YakuPointDict = {
             Yaku.KASU : 1,
             Yaku.TANN : 1,
@@ -210,6 +220,8 @@ class YakuManager:
             Yaku.KUTTSUKI : 6,
             Yaku.NOMI : 10,
         }
+    
+
 
     def isInitialYaku(self,player:Player):
         di = {}

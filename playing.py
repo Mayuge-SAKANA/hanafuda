@@ -14,12 +14,17 @@ def addCardToField(card,field,player):
         candidates.remove(pickCard)
         field.removeCard(pickCard)
 
-def showGame(player1,player2,field):
+def showGame(player1,player2,field,deck=None):
     players = []
     if player1.isAuto==False:
         players = [player2,player1]
     else:
         players = [player1,player2]
+
+    if deck is not None:
+        print(deck.to_str())
+        print('--------------------------------')
+    
     print(f"{players[0].playerName}: ",players[0].to_str())
     print()
     print("field: ",field.to_str())
@@ -46,10 +51,6 @@ def playGame(player1,player2,seed):
             field = Field()
             continue
         break
-    
-    print(f"deck seed is {seed}")
-    print("==============================")
-    print()
 
     players = [player1,player2]
     for player in players:
@@ -70,8 +71,9 @@ def playGame(player1,player2,seed):
         for pIdx, player in enumerate(players):
             
             if player.isAuto is False:
+                print()
                 print("==============================")
-                showGame(player1,player2,field) 
+                showGame(player1,player2,field,deck) 
                 print("==============================")
 
             # here requires player selection of card
@@ -87,7 +89,7 @@ def playGame(player1,player2,seed):
             yakuDict = yakuMng.isYaku(player)
             if yakuMng.isNewYaku(yakuDict, player):
                 print("==============================")
-                showGame(player1,player2,field) 
+                showGame(player1,player2,field,deck) 
                 print("==============================")     
 
                 print(f"player{pIdx+1} achieved")
@@ -138,6 +140,9 @@ def main():
     for i in range(playnum):
         print(f"play {i}th game")
         seed = random.randint(0,10000)
+        print(f"deck seed is {seed}")
+        print("==============================")
+        print()
         player1 = Player(playerName if playerOrder==0 else "player1",isAuto=(playerOrder==1))
         player2 = Player(playerName if playerOrder==1 else "player2",isAuto=(playerOrder==0))
         sc,winner = playGame(player1,player2,seed)
