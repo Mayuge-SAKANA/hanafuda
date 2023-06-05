@@ -197,9 +197,7 @@ class Player:
         return ret
 
 class YakuManager:         
-    def __init__(self,player1:Player=None,player2:Player=None,field:Field=None,deck:Deck=None):
-        self.player1 = player1
-        self.player2 = player2
+    def __init__(self,field:Field=None,deck:Deck=None):
         self.field = field
         self.deck = deck
         self.YakuPointDict = {
@@ -220,6 +218,82 @@ class YakuManager:
             Yaku.KUTTSUKI : 6,
             Yaku.NOMI : 10,
         }
+
+    def getCardsList(self,player:Player, isBlind:bool = True):
+        ret = []
+        if not isBlind:
+            for card in player.hand:
+                ret.append(card)
+        for card in player.kasu:
+            ret.append(card)
+        for card in player.tane:
+            ret.append(card)            
+        for card in player.tane:
+            ret.append(card)  
+        return ret
+
+    def yakuProb(self,player:Player,enemy:Player,isBlind:bool = True):
+        fieldDecks = []
+        for card in self.deck.cards:
+            fieldDecks.append(card)
+        for card in self.field.cards:
+            fieldDecks.append(card)
+
+        aotn = 0
+        aktn = 0
+        for card in player.tann:
+            if card.month in TannYaku.AOTAN.value:
+                aotn+=1
+            if card.month in TannYaku.AKATAN.value:
+                aktn+=1    
+        inoshika = 0
+        kiku = 0
+        for card in player.tane:
+            if card.month in TANEYaku.INOSHIKACHO.value:
+                inoshika +=1
+            if card.month is Month.SEPTEMBER:
+                kiku = 1
+        hikari11 = 0
+        sakura = 0
+        tsuki = 0
+        for card in player.hikari:
+            if card.month == Month.NOVEMBER:
+                hikari11 = 1
+            if card.month == Month.MARCH:
+                sakura = 1
+            if card.month == Month.AUGUST:
+                tsuki = 1
+        hikari = len(player.hikari)-hikari11
+
+        kasu = len(player.kasu)
+        tann = len(player.tann)
+        tane = len(player.tane)
+
+
+        reqDict = {
+                    Yaku.KASU : 10-min(kasu,10),
+                    Yaku.TANN : 5-min(tann,5),
+                    Yaku.TANE : 5-min(tane,5),
+                    Yaku.AOTAN : 3-aotn,
+                    Yaku.AKATAN : 3-aktn,
+                    Yaku.BOOK : 6-aotn-aktn,
+                    Yaku.INOSHIKA : 3-inoshika,
+                    Yaku.SANKO : max(0,hikari),
+                    Yaku.AMESHIKO : 4-min(hikari,3)-hikari11,
+                    Yaku.SHIKO : 4-min(hikari,4),
+                    Yaku.GOKO : 5-hikari-hikari11,
+                    Yaku.HANAMI : 2-kiku-sakura,
+                    Yaku.TSUKIMI : 2-kiku-tsuki,
+                    Yaku.NOMI : 3-kiku-tsuki-sakura,
+                }
+        
+        
+
+        
+
+
+        
+
     
 
 
