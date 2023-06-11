@@ -71,6 +71,10 @@ def playGame(player1,player2,seed):
         for pIdx, player in enumerate(players):
             
             if player.isAuto is False:
+                probDict1 = yakuMng.yakuProb(player1,player2)
+                probDict2 = yakuMng.yakuProb(player2,player1)
+                print("player1", probDict1)
+                print("player2", probDict2)
                 print()
                 print("==============================")
                 showGame(player1,player2,field,deck) 
@@ -87,6 +91,7 @@ def playGame(player1,player2,seed):
             addCardToField(newcard,field,player)
 
             yakuDict = yakuMng.isYaku(player)
+
             if yakuMng.isNewYaku(yakuDict, player):
                 print("==============================")
                 showGame(player1,player2,field,deck) 

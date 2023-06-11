@@ -233,12 +233,31 @@ class YakuManager:
         return ret
 
     def yakuProb(self,player:Player,enemy:Player,isBlind:bool = True):
-        fieldDecks = []
-        for card in self.deck.cards:
-            fieldDecks.append(card)
-        for card in self.field.cards:
-            fieldDecks.append(card)
+        kasuTotal = 24
+        tanTotal = 10
+        taneTotal = 10
+        playerYaku, playerYakuMax = self.getCurYakuCards(player)
+        enemyYaku, enemyYakuMax = self.getCurYakuCards(enemy)
+        reqDict = {}
+        for yaku in playerYaku:
+            val = 0
+            val = -enemyYaku[yaku] - playerYaku[yaku]
+            if yaku is Yaku.KASU:
+                val += kasuTotal
+            elif yaku is Yaku.TANN:
+                val += tanTotal
+            elif yaku is Yaku.TANE:
+                val += taneTotal
+            else:
+                val += playerYakuMax[yaku]
+            
 
+            reqDict[yaku] = val
+        return reqDict
+
+
+
+    def getCurYakuCards(self,player:Player):
         aotn = 0
         aktn = 0
         for card in player.tann:
@@ -270,23 +289,41 @@ class YakuManager:
         tane = len(player.tane)
 
 
-        reqDict = {
-                    Yaku.KASU : 10-min(kasu,10),
-                    Yaku.TANN : 5-min(tann,5),
-                    Yaku.TANE : 5-min(tane,5),
-                    Yaku.AOTAN : 3-aotn,
-                    Yaku.AKATAN : 3-aktn,
-                    Yaku.BOOK : 6-aotn-aktn,
-                    Yaku.INOSHIKA : 3-inoshika,
-                    Yaku.SANKO : max(0,hikari),
-                    Yaku.AMESHIKO : 4-min(hikari,3)-hikari11,
-                    Yaku.SHIKO : 4-min(hikari,4),
-                    Yaku.GOKO : 5-hikari-hikari11,
-                    Yaku.HANAMI : 2-kiku-sakura,
-                    Yaku.TSUKIMI : 2-kiku-tsuki,
-                    Yaku.NOMI : 3-kiku-tsuki-sakura,
+        yakuNum =  {
+                    Yaku.KASU : min(24, max(kasu+1,10)),
+                    Yaku.TANN : min(10, max(tann+1,5)),
+                    Yaku.TANE : min(10,max(tane+1,5)),
+                    Yaku.AOTAN : 3,
+                    Yaku.AKATAN : 3,
+                    Yaku.BOOK : 6,
+                    Yaku.INOSHIKA : 3,
+                    Yaku.SANKO : 3,
+                    Yaku.AMESHIKO : 4,
+                    Yaku.SHIKO : 4,
+                    Yaku.GOKO : 5,
+                    Yaku.HANAMI : 2,
+                    Yaku.TSUKIMI : 2,
+                    Yaku.NOMI : 3,
                 }
+
+        myDict = {
+                    Yaku.KASU : min(kasu,yakuNum[Yaku.KASU]),
+                    Yaku.TANN : min(tann,yakuNum[Yaku.TANN]),
+                    Yaku.TANE : min(tane,yakuNum[Yaku.TANE]),
+                    Yaku.AOTAN : aotn,
+                    Yaku.AKATAN : aktn,
+                    Yaku.BOOK : aotn+aktn,
+                    Yaku.INOSHIKA : inoshika,
+                    Yaku.SANKO : min(3,hikari),
+                    Yaku.AMESHIKO : min(hikari,3)+hikari11,
+                    Yaku.SHIKO : min(hikari,4),
+                    Yaku.GOKO : hikari+hikari11,
+                    Yaku.HANAMI : kiku+sakura,
+                    Yaku.TSUKIMI : kiku+tsuki,
+                    Yaku.NOMI : kiku+tsuki+sakura,
+            }
         
+        return  myDict,yakuNum
         
 
         
